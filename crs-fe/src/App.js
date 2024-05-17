@@ -1,20 +1,32 @@
-import "./App.css";
-import * as React from 'react';
-import { View} from 'react-native';
-import Nav from './components/Nav';
-import { Routes, Route } from 'react-router-dom';
-import Login_page from './pages/login_page';
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/login_page';
+import DoctorDashboard from './pages/doctor_dashboard';
+import PatientDashboard from './pages/patient_dashboard';
 
 function App() {
-  return (
-    <View>
-      <View />
-      <Nav />
-      <Routes>
-        <Route path='/' element={<Login_page />}></Route>
-       </Routes>
-    </View>
-  );
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userRole, setUserRole] = useState('');
+
+    const handleLoginSuccess = (role) => {
+        setIsLoggedIn(true);
+        setUserRole(role);
+    };
+
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+        setUserRole('');
+    };
+
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={!isLoggedIn ? <LoginPage onLoginSuccess={handleLoginSuccess} /> : <Navigate to={`/${userRole}`} />} />
+                <Route path="/doctor" element={isLoggedIn && userRole === 'doctor' ? <DoctorDashboard onLogout={handleLogout} /> : <Navigate to="/" />} />
+                <Route path="/patient" element={isLoggedIn && userRole === 'patient' ? <PatientDashboard onLogout={handleLogout} /> : <Navigate to="/" />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;
